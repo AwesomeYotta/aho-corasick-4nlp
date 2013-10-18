@@ -34,7 +34,8 @@ main(int argc, char **argv)
     FILE *pfp = fopen(argv[1], "r");
     if (!pfp) die(": unable to open %s:", argv[1]);
 
-    MEMREF text = bufref(slurp(argv[2]));
+    MEMBUF filedata = slurp(argv[2]);
+    MEMREF text = bufref(filedata);
     if (nilref(text)) die(": unable to load %s:", argv[2]);
 
     ACISM *psp = acism_mmap(pfp);
@@ -45,6 +46,8 @@ main(int argc, char **argv)
         "mmap-ed acism object works");
 
     fprintf(stderr, "# nmatches: %d %.4f secs\n", nmatches, tick() - t0);
+    buffree(filedata);
+
     acism_dump(psp, PS_STATS, stderr, NULL);
     acism_destroy(psp);
 

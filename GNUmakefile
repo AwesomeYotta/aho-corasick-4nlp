@@ -1,6 +1,7 @@
 -include rules.mk
 # GMAKE stupidly trims off leading "./" where least appropriate
 export acism ?= .
+CFLAGS = -g
 
 #---------------- PRIVATE VARS:
 # acism.pgms: test programs requiring no args
