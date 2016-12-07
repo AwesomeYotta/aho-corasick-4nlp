@@ -69,7 +69,7 @@ main(int argc, char **argv)
         if (argc > 3) matchfp = fopen(argv[3], "w");
         while (0 < (text.len = read(fd, buf, sizeof buf))) {
             t = tick();
-            (void)acism_more(psp, text, (ACISM_ACTION*)on_match, pattv, &state);
+            (void)acism_more(psp, text, (ACISM_ACTION*)on_match, pattv, &state, 1);
             elapsed += tick() - t;
             putc('.', stderr);
         }
