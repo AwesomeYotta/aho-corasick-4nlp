@@ -56,7 +56,7 @@ acism_dump(ACISM const* psp, PS_DUMP_TYPE pdt, FILE *out, MEMREF const*pattv)
                 ++symdist[t_sym(psp, psp->tranv[i])];
             } else ++empty;
         }
-        fprintf(out, "strs:%d syms:%d chars:%d "
+        fprintf(out, "strs:%zu syms:%zu chars:%zu "
                      "trans:%d empty:%d mod:%d hash:%d size:%lu\n",
                 psp->nstrs, psp->nsyms, psp->nchars,
                 psp->tran_size, empty, psp->hash_mod, psp->hash_size,

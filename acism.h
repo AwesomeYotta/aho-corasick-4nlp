@@ -30,7 +30,7 @@ typedef struct { char const *ptr; size_t len; } MEMREF;
 
 typedef struct acism ACISM;
 
-ACISM* acism_create(MEMREF const *strv, int nstrs);
+ACISM* acism_create(MEMREF const *strv, size_t nstrs);
 void   acism_destroy(ACISM*);
 
 // For each match, acism_scan calls its ACISM_ACTION fn,

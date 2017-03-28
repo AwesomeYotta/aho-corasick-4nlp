@@ -38,12 +38,12 @@ static inline int bitwid(unsigned u)
     return ret;
 }
 
-static void   fill_symv(ACISM*, MEMREF const*, int ns);
-static int    create_tree(TNODE*, SYMBOL const*symv, MEMREF const*strv, int nstrs);
+static void   fill_symv(ACISM*, MEMREF const*, size_t ns);
+static size_t create_tree(TNODE*, SYMBOL const*symv, MEMREF const*strv, size_t nstrs);
 static void   add_backlinks(TNODE*, TNODE**, TNODE**);
-static int    interleave(TNODE*, int nnodes, int nsyms, TNODE**, TNODE**);
+static size_t interleave(TNODE*, size_t nnodes, size_t nsyms, TNODE**, TNODE**);
 static void   fill_tranv(ACISM*, TNODE const*);
-static void   fill_hashv(ACISM*, TNODE const*, int nn);
+static void   fill_hashv(ACISM*, TNODE const*, size_t nn);
 
 static TNODE* find_child(TNODE*, SYMBOL);
 
@@ -69,7 +69,7 @@ extern PSSTAT psstat[];
 
 //--------------|---------------------------------------------
 ACISM*
-acism_create(MEMREF const* strv, int nstrs)
+acism_create(MEMREF const* strv, size_t nstrs)
 {
     TNODE *tp, **v1 = NULL, **v2 = NULL;
     ACISM *psp = calloc(1, sizeof*psp);
@@ -77,15 +77,15 @@ acism_create(MEMREF const* strv, int nstrs)
     fill_symv(psp, strv, nstrs);
     TNODE *troot = calloc(psp->nchars + 1, sizeof*troot);
 
-    int nnodes = create_tree(troot, psp->symv, strv, nstrs);
+    size_t nnodes = create_tree(troot, psp->symv, strv, nstrs);
     NOTE(nnodes);
 
     // v1, v2: breadth-first work vectors for add_backlink and interleave.
-    int i = (nstrs + 1) * sizeof*tp;
+    size_t i = (nstrs + 1) * sizeof*tp;
     add_backlinks(troot, v1 = malloc(i), v2 = malloc(i));
     
     int     nhash = 0;
-    TNODE*  tp = troot + nnodes;
+    tp = troot + nnodes;
     while (--tp > troot)
         nhash += tp->match && tp->child;
     
@@ -134,15 +134,18 @@ typedef struct { int freq, rank; } FRANK;
 static int frcmp(FRANK*a, FRANK*b) { return a->freq - b->freq; }
 
 static void
-fill_symv(ACISM *psp, MEMREF const *strv, int nstrs)
+fill_symv(ACISM *psp, MEMREF const *strv, size_t nstrs)
 {
-    int i, j;
+    int i;
     FRANK frv[256];
 
     for (i = 0; i < 256; ++i) frv[i] = (FRANK){0,i};
-    for (i = 0; i < nstrs; ++i)
-        for (psp->nchars += j = strv[i].len; --j >= 0;)
+    for (i = 0; i < (int)nstrs; ++i) {
+        size_t j;
+        psp->nchars += strv[i].len;
+        for (j = 0; j < strv[i].len; ++j)
             frv[(uint8_t)strv[i].ptr[j]].freq++;
+    }
 
     qsort(frv, 256, sizeof*frv, (qsort_cmp)frcmp);
 
@@ -155,16 +158,16 @@ fill_symv(ACISM *psp, MEMREF const *strv, int nstrs)
 #endif
 }
 
-static int
-create_tree(TNODE *Tree, SYMBOL const *symv, MEMREF const *strv, int nstrs)
+static size_t
+create_tree(TNODE *Tree, SYMBOL const *symv, MEMREF const *strv, size_t nstrs)
 {
-    int i, j;
+    size_t i, j;
     TNODE *nextp = Tree + 1;
 
     for (i = 0; i < nstrs; ++i) {
         TNODE *tp = Tree;
 
-        for (j = 0; tp->child && j < (int)strv[i].len; ++j) {
+        for (j = 0; tp->child && j < strv[i].len; ++j) {
             SYMBOL sym = symv[(uint8_t)strv[i].ptr[j]];
 
             if (sym < tp->child->sym) {
@@ -186,7 +189,7 @@ create_tree(TNODE *Tree, SYMBOL const *symv, MEMREF const *strv, int nstrs)
             }
         }
 
-        for (; j < (int) strv[i].len; ++j) {
+        for (; j < strv[i].len; ++j) {
             tp = tp->child = nextp++;
             tp->sym = symv[(uint8_t)strv[i].ptr[j]];
             tp->back = Tree;
@@ -239,10 +242,10 @@ add_backlinks(TNODE *troot, TNODE **v1, TNODE **v2)
     }
 }
 
-static int
-interleave(TNODE *troot, int nnodes, int nsyms, TNODE **v1, TNODE **v2)
+static size_t
+interleave(TNODE *troot, size_t nnodes, size_t nsyms, TNODE **v1, TNODE **v2)
 {
-    unsigned usev_size = nnodes + nsyms;
+    size_t usev_size = nnodes + nsyms;
     char *usev = calloc(usev_size, sizeof*usev);
     STATE last_trans = 0, startv[nsyms][2];
     TNODE *cp, **tmp;
@@ -315,10 +318,10 @@ interleave(TNODE *troot, int nnodes, int nsyms, TNODE **v1, TNODE **v2)
 }
 
 static void
-fill_hashv(ACISM *psp, TNODE const treev[], int nnodes)
+fill_hashv(ACISM *psp, TNODE const treev[], size_t nnodes)
 {
     STRASH *sv = malloc(psp->hash_mod * sizeof*sv), *sp = sv;
-    int i;
+    size_t i;
 
     // First pass: insert without resolving collisions.
     for (i = 0; i < nnodes; ++i) {

@@ -80,7 +80,7 @@ struct acism {
     unsigned hash_mod; // search hashv starting at (state + sym) % hash_mod.
     unsigned hash_size; // #(hashv): hash_mod plus the overflows past [hash_mod-1]
     unsigned tran_size; // #(tranv)
-    unsigned nsyms, nchars, nstrs, maxlen;
+    size_t nsyms, nchars, nstrs, maxlen;
     SYMBOL symv[256];
 };
 
