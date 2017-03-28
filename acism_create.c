@@ -37,10 +37,10 @@ static inline int bitwid(unsigned u)
     if (u & 0x00000002) ret++;
     return ret;
 }
+
 static void   fill_symv(ACISM*, MEMREF const*, int ns);
 static int    create_tree(TNODE*, SYMBOL const*symv, MEMREF const*strv, int nstrs);
 static void   add_backlinks(TNODE*, TNODE**, TNODE**);
-static void   prune_backlinks(TNODE*);
 static int    interleave(TNODE*, int nnodes, int nsyms, TNODE**, TNODE**);
 static void   fill_tranv(ACISM*, TNODE const*);
 static void   fill_hashv(ACISM*, TNODE const*, int nn);
@@ -81,14 +81,14 @@ acism_create(MEMREF const* strv, int nstrs)
     NOTE(nnodes);
 
     // v1, v2: breadth-first work vectors for add_backlink and interleave.
-    int nhash, i = (nstrs + 1) * sizeof*tp;
+    int i = (nstrs + 1) * sizeof*tp;
     add_backlinks(troot, v1 = malloc(i), v2 = malloc(i));
-
-    for (tp = troot + nnodes, nhash = 0; --tp > troot;) {
-        prune_backlinks(tp);
+    
+    int     nhash = 0;
+    TNODE*  tp = troot + nnodes;
+    while (--tp > troot)
         nhash += tp->match && tp->child;
-    }
-
+    
     // Calculate each node's offset in tranv[]:
     psp->tran_size = interleave(troot, nnodes, psp->nsyms, v1, v2);
     if (bitwid(psp->tran_size + nstrs - 1) + SYM_BITS > sizeof(TRAN)*8 - 2)
@@ -212,9 +212,20 @@ add_backlinks(TNODE *troot, TNODE **v1, TNODE **v2)
         while ((srcp = *spp++)) {
             for (dstp = srcp->child; dstp; dstp = dstp->next) {
                 TNODE *bp = NULL;
-                *dpp++ = dstp;
+                if (dstp->child)
+                    *dpp++ = dstp;
+
+                // Go through the parent (srcp) node's backlink chain,
+                //  looking for a useful backlink for the child (dstp).
+                // If the parent (srcp) has a backlink to (tp), and (tp) has a child (with children)
+                //  matching the transition sym for (srcp -> dstp),
+                //  then it is a useful backlink for the child (dstp).
+                // Note that backlinks do not point at the suffix match;
+                //  they point at the PARENT of that match.
+
                 for (tp = srcp->back; tp; tp = tp->back)
-                   if ((bp = find_child(tp, dstp->sym))) break;
+                    if ((bp = find_child(tp, dstp->sym)) && bp->child)
+                        break;
                 if (!bp)
                     bp = troot;
 
@@ -225,40 +236,6 @@ add_backlinks(TNODE *troot, TNODE **v1, TNODE **v2)
         }
         *dpp = 0;
         tmp = v1; v1 = v2; v2 = tmp;
-    }
-}
-
-static void
-prune_backlinks(TNODE *tp)
-{
-    if (tp->x.nrefs || !tp->child)
-        return;
-
-    TNODE *bp;
-        // (bp != bp->back IFF bp != troot)
-    while ((bp = tp->back) && !bp->match && bp != bp->back) {
-        HIT("backlinks");
-        TNODE *cp = tp->child, *pp = bp->child;
-
-        // Search for a child of bp that's not a child of tp
-        for (; cp && pp && pp->sym >= cp->sym; cp = cp->next) {
-            if (pp->sym == cp->sym) {
-                if (pp->match && cp->is_suffix) break;
-                pp = pp->next;
-            }
-        }
-
-        if (pp) break;
-
-        // So, target of back link is not a suffix match
-        // of this node, and its children are a subset
-        // of this node's children: prune it.
-        HIT("pruned");
-        if ((tp->back = bp->back)) {
-            tp->back->x.nrefs++;
-            if (!--bp->x.nrefs)
-                prune_backlinks(bp);
-        }
     }
 }
 
