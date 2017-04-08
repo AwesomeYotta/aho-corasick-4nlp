@@ -85,7 +85,7 @@ acism_create(MEMREF const* strv, int nstrs)
     add_backlinks(troot, v1 = malloc(i), v2 = malloc(i));
     
     int     nhash = 0;
-    TNODE*  tp = troot + nnodes;
+    tp = troot + nnodes;
     while (--tp > troot)
         nhash += tp->match && tp->child;
     
