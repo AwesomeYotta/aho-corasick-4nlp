@@ -28,9 +28,9 @@
 #   define FX   "l"
 #endif
 
-static void putb(FILE*out, int ch)   
+static void putb(FILE*out, int ch)
 {
-    fprintf(out, isprint(ch) ? "'%c" : "%02.2X", ch);
+    fprintf(out, isprint(ch) ? "'%c" : "%2.2X", ch);
 }
 
 static void putsym(FILE*out, int sym, char const*charv)
@@ -55,9 +55,9 @@ static void printree(ACISM const* psp,
 void
 acism_dump(ACISM const* psp, PS_DUMP_TYPE pdt, FILE *out, MEMREF const*pattv)
 {
-    int         i, empty, sym, symdist[257] = { 0 };
+    int         i, empty, symdist[257] = { 0 };
     char        charv[256];
- 
+
     for (i = 256; --i >=0;) charv[psp->symv[i]] = i;
 
     if (pdt & PS_STATS) {
@@ -75,7 +75,7 @@ acism_dump(ACISM const* psp, PS_DUMP_TYPE pdt, FILE *out, MEMREF const*pattv)
 
     // For TRAN/HASH/TREE, print a symbol map (sym -> char/byte).
     if (pdt & ~PS_STATS) {
-         for (i = 1; i < psp->nsyms; i++) {
+         for (i = 1; i < (int)psp->nsyms; i++) {
              fprintf(out, "  %u:", i); putsym(out, i, charv);
          }
          putc('\n', out);
@@ -94,7 +94,7 @@ acism_dump(ACISM const* psp, PS_DUMP_TYPE pdt, FILE *out, MEMREF const*pattv)
             STATE state = psp->hashv[i].state;
             if (state)
                 fprintf(out, "%5d: %7"FX"u %3d %8"FX"u %.*s\n",
-                        i, state, i - p_hash(psp, state), 
+                        i, state, i - p_hash(psp, state),
                         PSTR(psp, psp->hashv[i].strno, pattv));
             else
                 fprintf(out, "%5d: %7"FX"d --- %8"FX"d\n", i, state,
