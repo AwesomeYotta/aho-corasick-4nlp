@@ -158,9 +158,7 @@ fill_symv(ACISM *psp, MEMREF const *strv, int nstrs)
 
 #if ACISM_SIZE < 8
     psp->sym_bits = bitwid(psp->nsyms);
-    // all bit set to 1
-    static const TRAN MASK = ~((TRAN)0);
-    psp->sym_mask = ~(MASK << psp->sym_bits);
+    psp->sym_mask = ~(~0 << psp->sym_bits);
 #endif
 }
 
