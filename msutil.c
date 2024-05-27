@@ -25,6 +25,9 @@
 #include <fcntl.h>    // open O_RDONLY
 #include <stdarg.h>
 #include <sys/stat.h>
+#if defined(_WIN32)
+#include <io.h>
+#endif
 
 char const *errname[] = {
     /*_00*/ "",              "EPERM",           "ENOENT",       "ESRCH",           "EINTR",
