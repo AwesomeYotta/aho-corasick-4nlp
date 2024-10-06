@@ -57,7 +57,7 @@ static TNODE* find_child(TNODE*, SYMBOL);
 static inline void
 set_tran(ACISM *psp, STATE s, SYMBOL sym, int match, int suffix, TRAN ns)
 {
-    psp->tranv[s + sym] = sym    | (match ? IS_MATCH : 0) 
+    psp->tranv[s + sym] = sym    | (match ? IS_MATCH : 0)
                                 | (suffix ? IS_SUFFIX : 0)
                                 | (ns << SYM_BITS);
 }
@@ -89,12 +89,12 @@ acism_create(MEMREF const* strv, int nstrs)
     // v1, v2: breadth-first work vectors for add_backlink and interleave.
     int i = (nstrs + 1) * sizeof(TNODE);
     add_backlinks(troot, v1 = malloc(i), v2 = malloc(i));
-    
+
     int     nhash = 0;
-    TNODE*  tp = troot + nnodes;
+    TNODE *tp = troot + nnodes;
     while (--tp > troot)
         nhash += tp->match && tp->child;
-    
+
     // Calculate each node's offset in tranv[]:
     psp->tran_size = interleave(troot, nnodes, psp->nsyms, v1, v2);
     if (bitwid(psp->tran_size + nstrs - 1) + SYM_BITS > sizeof(TRAN)*8 - 2)
@@ -158,7 +158,9 @@ fill_symv(ACISM *psp, MEMREF const *strv, int nstrs)
 
 #if ACISM_SIZE < 8
     psp->sym_bits = bitwid(psp->nsyms);
-    psp->sym_mask = ~(~0 << psp->sym_bits);
+    // all bit set to 1
+    static const TRAN MASK = ~((TRAN)0);
+    psp->sym_mask = ~(MASK << psp->sym_bits);
 #endif
 }
 
@@ -226,8 +228,8 @@ add_backlinks(TNODE *troot, TNODE **v1, TNODE **v2)
                 // Go through the parent (srcp) node's backlink chain,
                 //  looking for a useful backlink for the child (dstp).
                 // If the parent (srcp) has a backlink to (tp),
-                //  and (tp) has a child matching the transition sym 
-                //  for (srcp -> dstp), then it is a useful backlink 
+                //  and (tp) has a child matching the transition sym
+                //  for (srcp -> dstp), then it is a useful backlink
                 //  for the child (dstp).
                 // Note that backlinks do not point at the suffix match;
                 //  they point at the PARENT of that match.

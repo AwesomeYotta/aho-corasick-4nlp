@@ -62,11 +62,18 @@ typedef unsigned _SYMBOL; // An efficient stacklocal SYMBOL
 #define ROOT ((STATE) 0)
 
 // MATCH and SUFFIX are the top 2 bits of a TRAN:
-enum { 
-    IS_MATCH  = (TRAN)1 << (8*sizeof(TRAN) - 1),
-    IS_SUFFIX = (TRAN)1 << (8*sizeof(TRAN) - 2),
-    T_FLAGS   = IS_MATCH | IS_SUFFIX
-};
+// warning: ISO C restricts enumerator values to range of ‘int’ [-Wpedantic]
+// enum { 
+//     IS_MATCH  = (TRAN)1 << (8*sizeof(TRAN) - 1),
+//     IS_SUFFIX = (TRAN)1 << (8*sizeof(TRAN) - 2),
+//     T_FLAGS   = IS_MATCH | IS_SUFFIX
+// };
+static const TRAN IS_MATCH  = (TRAN)1 << (8*sizeof(TRAN) - 1);
+static const TRAN IS_SUFFIX = (TRAN)1 << (8*sizeof(TRAN) - 2);
+// windows C not allow this
+// static const TRAN T_FLAGS   = IS_MATCH | IS_SUFFIX;
+static const TRAN T_FLAGS   = ((TRAN)1 << (8*sizeof(TRAN) - 1)) | ((TRAN)1 << (8*sizeof(TRAN) - 2));
+
 
 typedef struct { STATE state; STRNO strno; } STRASH;
 

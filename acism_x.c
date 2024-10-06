@@ -1,5 +1,5 @@
 #include "msutil.h"
-#include <errno.h> 
+#include <errno.h>
 #include <fcntl.h> // open(2)
 #include "tap.h"
 #include "acism.h"
@@ -69,18 +69,17 @@ main(int argc, char **argv)
 
     if (argc > 2) {
         // Negative count => print match details
-        int expected = argc > 3 ? atoi(argv[3]) : 0;
-        int details = expected < 0;
-        if (details) expected = -expected;
-        FILE*	textfp = FOPEN(argv[2], "r");		// REUSE PATTERN FILE AS A TARGET
-        if (!fp) die("cannot open %s", argv[2]);
+        int expected = argc > 2 ? atoi(argv[2]) : 0;
+        if (expected < 0) expected = -expected;
+        FILE*	textfp = FOPEN(argv[1], "r");		// REUSE PATTERN FILE AS A TARGET
+        if (!textfp) die("cannot open %s", argv[1]);
         static char buf[1024*1024];
         MEMREF		text = {buf, 0};
         int			state = 0;
         double		elapsed = 0, start = tick();
         while (0 < (text.len = fread(buf, sizeof*buf, sizeof buf, textfp))) {
             t = tick();
-            (void)acism_more(psp, text, (ACISM_ACTION*)on_match, pattv, &state);
+            (void)acism_more(psp, text, (ACISM_ACTION*)on_match, pattv, &state, 1);
             elapsed += tick() - t;
             putc('.', stderr);
         }

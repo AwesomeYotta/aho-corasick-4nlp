@@ -132,9 +132,10 @@ getprogname(void)
         char*   buf = __argv[0];
 #       else
         char    buf[999];
+        char    buf_path[999];
         int     len;
-        sprintf(buf, "/proc/%d/exe", getpid());
-        len = readlink(buf, buf, sizeof(buf));
+        sprintf(buf_path, "/proc/%d/exe", getpid());
+        len = readlink(buf_path, buf, sizeof(buf));
         if (len < 0 || len == sizeof(buf))
             return NULL;
         buf[len] = 0;

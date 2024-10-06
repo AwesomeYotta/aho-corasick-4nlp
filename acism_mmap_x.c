@@ -41,7 +41,7 @@ main(int argc, char **argv)
     ok(psp, "acism_mmap returned");
     fclose(pfp);
     double t0 = tick();
-    ok(!acism_scan(psp, text, on_match, NULL),
+    ok(!acism_scan(psp, text, on_match, NULL, 1),
         "mmap-ed acism object works");
 
     fprintf(stderr, "# nmatches: %d %.4f secs\n", nmatches, tick() - t0);

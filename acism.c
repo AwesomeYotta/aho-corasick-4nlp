@@ -17,18 +17,20 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <ctype.h>
 #include "_acism.h"
 
 int
 acism_more(ACISM const *psp, MEMREF const text,
-           ACISM_ACTION *cb, void *context, int *statep)
+    ACISM_ACTION *cb, void *context, int *statep, int case_sensitive)
 {
     char const *cp = text.ptr, *endp = cp + text.len;
     STATE state = *statep;
     int ret = 0;
 
     while (cp < endp) {
-        _SYMBOL sym = psp->symv[(uint8_t)*cp++];
+        char const ch = case_sensitive ? *cp++ : tolower(*cp++);
+        _SYMBOL sym = psp->symv[(uint8_t)ch];
         if (!sym) {
             // Input byte is not in any pattern string.
             state = ROOT;
