@@ -65,3 +65,12 @@ ACKNOWLEDGEMENTS
 I'd like to thank Mike Shannon, who wanted to see a machine built to make best use of L1/L2 cache.
 The change to do that doubled performance on hardware with a much larger cache than the matrix.
 Go figure.
+
+WHY THIS FORK
+----------------
+
+1. Adding CMake support so we can easily build this library togeher with the entire software.
+2. Merge useful features and bug fixes from other forks.
+3. Adding features and optimize for NLP while keeping the performance outstanding.
+
+Jason JI jason@yottagene.com
