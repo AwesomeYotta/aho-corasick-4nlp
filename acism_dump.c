@@ -67,10 +67,10 @@ acism_dump(ACISM const* psp, PS_DUMP_TYPE pdt, FILE *out, MEMREF const*pattv)
             } else ++empty;
         }
         fprintf(out, "strs:%d syms:%d chars:%d "
-                     "trans:%d empty:%d mod:%d hash:%d size:%lu\n",
+                     "trans:%d empty:%d mod:%d hash:%d size:%zu\n",
                 psp->nstrs, psp->nsyms, psp->nchars,
                 psp->tran_size, empty, psp->hash_mod, psp->hash_size,
-                (long)sizeof(ACISM) + p_size(psp));
+                (size_t)(sizeof(ACISM) + p_size(psp)));
     }
 
     // For TRAN/HASH/TREE, print a symbol map (sym -> char/byte).
